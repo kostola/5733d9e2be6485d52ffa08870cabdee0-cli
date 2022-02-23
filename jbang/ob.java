@@ -1,28 +1,32 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS info.picocli:picocli:4.5.0
+//DEPS io.quarkus:quarkus-picocli:2.7.1.Final
+//DEPS com.redhat.service.bridge.cli:logic:1.0.0-SNAPSHOT
+//JAVAC_OPTIONS -parameters
 
+//FILES reflection-config.json
+//FILES resources-config.json
 
+import javax.inject.Inject;
+
+import io.quarkus.runtime.Quarkus;
+import io.quarkus.runtime.QuarkusApplication;
+import io.quarkus.runtime.annotations.QuarkusMain;
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
 
-import java.util.concurrent.Callable;
+import com.redhat.service.bridge.cli.command.MainCommand;
 
-@Command(name = "ob", mixinStandardHelpOptions = true, version = "ob 0.1",
-        description = "ob made with jbang")
-class ob implements Callable<Integer> {
+@QuarkusMain
+public class ob implements QuarkusApplication {
 
-    @Parameters(index = "0", description = "The greeting to print", defaultValue = "World!")
-    private String greeting;
+    @Inject
+    CommandLine.IFactory factory;
 
-    public static void main(String... args) {
-        int exitCode = new CommandLine(new ob()).execute(args);
-        System.exit(exitCode);
-    }
+    @Inject
+    MainCommand command;
 
     @Override
-    public Integer call() throws Exception { // your business logic goes here...
-        System.out.println("Hello " + greeting);
-        return 0;
+    public int run(String... args) throws Exception {
+        return new CommandLine(command, factory)
+                .execute(args);
     }
 }
