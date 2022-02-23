@@ -8,25 +8,18 @@
 
 import javax.inject.Inject;
 
-import io.quarkus.runtime.Quarkus;
+import com.redhat.service.bridge.cli.command.MainCommandFactory;
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
-import picocli.CommandLine;
-
-import com.redhat.service.bridge.cli.command.MainCommand;
 
 @QuarkusMain
 public class ob implements QuarkusApplication {
 
     @Inject
-    CommandLine.IFactory factory;
-
-    @Inject
-    MainCommand command;
+    MainCommandFactory commandFactory;
 
     @Override
     public int run(String... args) throws Exception {
-        return new CommandLine(command, factory)
-                .execute(args);
+        return commandFactory.build().execute(args);
     }
 }

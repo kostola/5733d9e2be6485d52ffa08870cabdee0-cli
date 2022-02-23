@@ -18,6 +18,7 @@ public class BridgeCommand extends BaseCommand {
     @Command(name = "list", description = "List bridges")
     void list() {
         Response response = client.bridgeList();
-        System.out.println(response.readEntity(JsonNode.class));
+        JsonNode result = response.readEntity(JsonNode.class);
+        result.get("items").forEach(System.out::println);
     }
 }

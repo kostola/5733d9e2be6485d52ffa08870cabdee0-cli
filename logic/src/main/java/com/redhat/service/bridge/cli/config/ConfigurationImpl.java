@@ -1,32 +1,45 @@
 package com.redhat.service.bridge.cli.config;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import com.redhat.service.bridge.cli.output.OutputType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class ConfigurationImpl implements Configuration {
 
-    @ConfigProperty(name = "ob.token")
-    Optional<String> optToken;
+    private static final Predicate<String> NOT_BLANK = s -> !s.isBlank();
 
-    private String token;
-
+    @ConfigProperty(name = "ob.output-type")
+    Optional<OutputType> optOutputType;
+    private OutputType outputType;
     @Override
-    public String getToken() {
-        return getOrError(token, optToken, "Missing access token");
+    public OutputType getOutputType() {
+        return getOrError(outputType, optOutputType, OutputType.HUMAN, null, "Missing output type");
+    }
+    @Override
+    public void setOutputType(OutputType outputType) {
+        this.outputType = outputType;
     }
 
+    @ConfigProperty(name = "ob.token")
+    Optional<String> optToken;
+    private String token;
+    @Override
+    public String getToken() {
+        return getOrError(token, optToken, null, NOT_BLANK, "Missing access token");
+    }
     @Override
     public void setToken(String token) {
         this.token = token;
     }
 
-    private static String getOrError(String optionValue, Optional<String> propValue, String errorMessage) {
-        return Optional.ofNullable(optionValue != null ? optionValue : propValue.orElse(null))
-                .filter(s -> !s.isBlank())
+    private static <T> T getOrError(T optionValue, Optional<T> propValue, T defaultValue, Predicate<T> validator, String errorMessage) {
+        return Optional.ofNullable(optionValue != null ? optionValue : propValue.orElse(defaultValue))
+                .filter(item -> validator == null || validator.test(item))
                 .orElseThrow(() -> new ConfigurationException(errorMessage));
     }
 }
