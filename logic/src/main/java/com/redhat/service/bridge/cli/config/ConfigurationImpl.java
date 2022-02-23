@@ -3,12 +3,12 @@ package com.redhat.service.bridge.cli.config;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 
 import com.redhat.service.bridge.cli.output.OutputType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-@ApplicationScoped
+@Singleton
 public class ConfigurationImpl implements Configuration {
 
     private static final Predicate<String> NOT_BLANK = s -> !s.isBlank();
