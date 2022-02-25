@@ -28,10 +28,18 @@ public interface OpenBridgeClient {
     Response bridgeCreate(BridgeRequest user);
 
     @GET
-    @Path("/bridges/{id}")
-    Response bridgeGet(@PathParam String id);
+    @Path("/bridges/{bridgeId}")
+    Response bridgeGet(@PathParam String bridgeId);
 
     @DELETE
-    @Path("/bridges/{id}")
-    Response bridgeDelete(@PathParam String id);
+    @Path("/bridges/{bridgeId}")
+    Response bridgeDelete(@PathParam String bridgeId);
+
+    @GET
+    @Path("/bridges/{bridgeId}/processors")
+    Response processorList(@PathParam String bridgeId);
+
+    @GET
+    @Path("/bridges/{bridgeId}/processors/{processorId}")
+    Response processorGet(@PathParam String bridgeId, @PathParam String processorId);
 }

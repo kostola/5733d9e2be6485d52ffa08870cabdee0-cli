@@ -1,9 +1,12 @@
 package com.redhat.service.bridge.cli.output;
 
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.enterprise.context.Dependent;
 
@@ -57,6 +60,10 @@ public class HumanOutputGenerator implements OutputGenerator {
     }
 
     private String generateObject(JsonNode input, List<String> fields) {
+        return generateObject(input, fields, 0);
+    }
+
+    private String generateObject(JsonNode input, List<String> fields, int padding) {
         List<String> realFields = new ArrayList<>();
         int maxFieldNameSize = 0;
 
@@ -71,10 +78,34 @@ public class HumanOutputGenerator implements OutputGenerator {
             }
         }
 
-        String formatTemplate = String.format("%%-%ds : %%s", maxFieldNameSize);
+        final String formatTemplate = String.format("%%-%ds : %%s", maxFieldNameSize);
+        final int subFieldPadding = padding + maxFieldNameSize + 3;
 
         return realFields.stream()
-                .map(f -> String.format(formatTemplate, f, input.get(f).asText()))
-                .collect(Collectors.joining("\n"));
+                .map(f -> String.format(formatTemplate, f, jsonNodeToHumanString(input.get(f), subFieldPadding)))
+                .collect(Collectors.joining("\n" + spaces(padding)));
+    }
+
+    private String jsonNodeToHumanString(JsonNode input, int padding) {
+        if (input == null) {
+            return "";
+        }
+        if (input.isArray()) {
+            String strPadding = spaces(padding);
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(input.iterator(), 0), false)
+                    .map(i -> generateObject(i, null, padding))
+                    .collect(Collectors.joining("\n" + strPadding + "---\n" + strPadding));
+        }
+        if (input.isObject()) {
+            return generateObject(input, null, padding);
+        }
+        return input.asText();
+    }
+
+    private String spaces(int spaces) {
+        if (spaces <= 0) {
+            return "";
+        }
+        return CharBuffer.allocate( spaces ).toString().replace('\0', ' ');
     }
 }

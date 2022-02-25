@@ -7,7 +7,8 @@ import picocli.CommandLine.ScopeType;
 
 @Command(name = "ob", mixinStandardHelpOptions = true, scope = ScopeType.INHERIT, version = "ob 1.0.0-SNAPSHOT", description = "ob made with jbang",
         subcommands = {
-                BridgeCommand.class
+                BridgeCommand.class,
+                ProcessorCommand.class
         }
 )
 public class MainCommand extends BaseCommand {
