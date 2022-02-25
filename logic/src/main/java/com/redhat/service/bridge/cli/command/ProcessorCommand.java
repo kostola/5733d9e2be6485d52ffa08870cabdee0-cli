@@ -31,4 +31,16 @@ public class ProcessorCommand extends BaseClientCommand {
         JsonNode result = response.readEntity(JsonNode.class);
         System.out.println(outputGeneratorFactory.get().generate(result, Collections.emptyList()));
     }
+
+    @Command(name = "delete", description = "Delete processor")
+    void delete(
+            @Option(names = {"-b", "--bridge"}, required = true, description = "Bridge ID") String bridgeId,
+            @Option(names = "--id", required = true, description = "Processor ID") String processorId
+    ) {
+        Response response = client.processorDelete(bridgeId, processorId);
+        String output = response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL
+                ? "OK"
+                : "ERROR: unknown response status " + response.getStatus();
+        System.out.println(output);
+    }
 }

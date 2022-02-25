@@ -42,4 +42,8 @@ public interface OpenBridgeClient {
     @GET
     @Path("/bridges/{bridgeId}/processors/{processorId}")
     Response processorGet(@PathParam String bridgeId, @PathParam String processorId);
+
+    @DELETE
+    @Path("/bridges/{bridgeId}/processors/{processorId}")
+    Response processorDelete(@PathParam String bridgeId, @PathParam String processorId);
 }
