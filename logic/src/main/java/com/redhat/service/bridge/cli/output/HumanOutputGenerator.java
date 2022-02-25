@@ -2,6 +2,7 @@ package com.redhat.service.bridge.cli.output;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -27,17 +28,24 @@ public class HumanOutputGenerator implements OutputGenerator {
             List<String> row = new ArrayList<>(fields.size());
             for (int i = 0; i < fields.size(); i++) {
                 String fieldName = fields.get(i);
-                row.add(item.get(fieldName).asText());
+
+                String itemFieldText = Optional.ofNullable(item)
+                        .filter(it -> it.has(fieldName))
+                        .map(it -> it.get(fieldName))
+                        .map(JsonNode::asText)
+                        .orElse("");
+
+                row.add(itemFieldText);
                 rowSize.set(i, Math.max(rowSize.get(i), row.get(i).length()));
             }
             rows.add(row);
         }
 
+        rowSize.set(rowSize.size() - 1, 1);
+
         String formatTemplate = rowSize.stream()
                 .map(n -> "%-" + n + "s")
                 .collect(Collectors.joining("  "));
-
-        System.out.println(formatTemplate);
 
         List<String> formattedRows = new ArrayList<>(rows.size() + 1);
         formattedRows.add(String.format(formatTemplate, fields.stream().map(String::toUpperCase).toArray()));
@@ -49,6 +57,24 @@ public class HumanOutputGenerator implements OutputGenerator {
     }
 
     private String generateObject(JsonNode input, List<String> fields) {
-        return input.toPrettyString();
+        List<String> realFields = new ArrayList<>();
+        int maxFieldNameSize = 0;
+
+        for (var fieldIt = input.fields(); fieldIt.hasNext(); ) {
+            var fieldEntry = fieldIt.next();
+            var fieldName = fieldEntry.getKey();
+            if (fields == null || fields.isEmpty() || fields.contains(fieldName)) {
+                realFields.add(fieldName);
+                if (fieldName.length() > maxFieldNameSize) {
+                    maxFieldNameSize = fieldName.length();
+                }
+            }
+        }
+
+        String formatTemplate = String.format("%%-%ds : %%s", maxFieldNameSize);
+
+        return realFields.stream()
+                .map(f -> String.format(formatTemplate, f, input.get(f).asText()))
+                .collect(Collectors.joining("\n"));
     }
 }
