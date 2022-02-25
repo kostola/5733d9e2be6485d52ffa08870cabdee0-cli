@@ -49,4 +49,13 @@ public class BridgeCommand extends BaseCommand {
         JsonNode result = response.readEntity(JsonNode.class);
         System.out.println(outputGeneratorFactory.get().generate(result, Collections.emptyList()));
     }
+
+    @Command(name = "delete", description = "Delete bridge")
+    void delete(@Parameters(index = "0", description = "Bridge ID") String id) {
+        Response response = client.bridgeDelete(id);
+        String output = response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL
+                ? "OK"
+                : "ERROR: unknown response status " + response.getStatus();
+        System.out.println(output);
+    }
 }

@@ -1,6 +1,7 @@
 package com.redhat.service.bridge.cli.client;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -29,4 +30,8 @@ public interface OpenBridgeClient {
     @GET
     @Path("/bridges/{id}")
     Response bridgeGet(@PathParam String id);
+
+    @DELETE
+    @Path("/bridges/{id}")
+    Response bridgeDelete(@PathParam String id);
 }
